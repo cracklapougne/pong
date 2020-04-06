@@ -1,0 +1,1098 @@
+<!doctype html>
+<html>
+<head>
+    <!--<link rel="stylesheet" href="style.css" />-->
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <title> Pong </title>
+
+</head>
+<style>
+    body{
+        text-align: center;
+        background-color: darkgreen;
+        font-family: Arial;
+    }
+    table{
+        /*border: 1px solid;*/
+        position : center ;
+        /*border-radius : 50px;*/
+        margin: auto;
+        width:50%;
+        border-collapse:separate;
+        border-spacing : 15px;
+    }
+    h1 {
+        text-align: center;
+        color: white;
+    }
+    td{
+        height: 50px;
+
+        text-align: center;
+        border: 0px solid white;
+        border-radius : 30px;
+        color: white;
+        background-color: green;
+    }
+    canvas{
+        width: 70%;
+        height: 40%;
+        margin : auto;
+        background-color: green;
+        position:center;
+        border-radius:30px
+    }
+    #score {
+        position: center;
+        /*border-radius : 50px;*/
+        margin: auto;
+        max-width: 50%;
+        border-collapse: separate;
+        border-spacing: 10px
+    }
+
+    #td_score_1, #td_score_2{
+        height: 60px;
+
+        text-align: center;
+        border: 0px solid white;
+        border-radius : 70px;
+        color: white;
+        background-color: green;
+        font-size : 200%
+    }
+
+    #fin_match{
+        width: 500px;
+        text-align: center;
+        margin : auto;
+        padding : 30px;
+        border: 0px solid white;
+        border-radius : 70px;
+        color: white;
+        background-color: green;
+        font-size : 130%
+    }
+    #joueur_1, #joueur_2{
+        height: 60px;
+        text-align: center;
+        border: 1px solid white;
+        border-radius : 30px;
+        color: darkgreen;
+        background-color: white;
+        font-size : 200%
+    }
+
+    div .button {
+        width:280px;
+        height: 30px;
+        font-size = 100%;
+        text-align: center;
+        border: 0px solid white;
+        border-radius: 30px;
+        color: white;
+        background-color: darkgreen;
+        margin:30px;
+        padding:10px
+    }
+
+    .bouton_retour{
+        border: 0px solid white;
+        position : left ;
+        /*border-radius : 50px;*/
+        margin: auto;
+        width:50%;
+        border-collapse:separate;
+        border-spacing : 10px;
+    }
+
+    #zone_chat td{
+        height: 30px;
+
+        text-align: center;
+        border: 0px solid white;
+        border-radius : 30px;
+        color: white;
+        background-color: green;
+        font-size : 100%
+    }
+    input{
+        width:92%;
+        margin:auto;
+        padding-bottom : 5px;
+        padding-top: 5px;
+        padding-right: 10px;
+        padding-left: 10px;
+        border : 2px white;
+        border-radius : 30px;
+        color: white;
+        background-color: green;
+        font-size : 100%
+    }
+    #zone_chat {
+        width: 100%;
+        position: -webkit-sticky;
+        bottom: 0;
+        display: inline;
+        margin-bottom:40px;
+    }
+    #zone{
+        position :relative;
+        height: 400px;
+        overflow : scroll;
+        width : 50%;
+        background-color: green;
+        border-radius :30px;
+        margin:auto;
+    }
+    #results td{
+        height: 30px;
+        text-align: center;
+        border: 0px solid white;
+        border-radius : 30px;
+        color: darkgreen;
+        background-color: white;
+        font-size : 100%
+    }
+    .bouton_retour{
+        height : 30px;
+    }
+
+    #sendbox td{
+        height : 30px;
+    }
+    input::-webkit-input-placeholder {
+        color: lightgreen !important;
+    }
+    input:-moz-placeholder { /* Firefox 18- */
+        color: lightgreen !important;
+    }
+    input::-moz-placeholder { /* Firefox 19+ */
+        color: lightgreen !important;
+    }
+    input:-ms-input-placeholder {
+        color: lightgreen !important;
+    }
+    #bignotif {
+        background-color: yellow;
+        color:green;
+        font-size: 130%;
+        font-style : bold;
+        width:32px;
+        height:32px;
+        border-radius:30px;
+        position:absolute;
+        right: 0;
+        bottom:0;
+        margin-bottom:10px;
+        margin-right:17px;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 32px;
+        display:none
+    }
+    .littlenotif {
+        background-color: yellow;
+        color:green;
+        font-size: 100%;
+        font-style : bold;
+        width:25px;
+        height:25px;
+        border-radius:25px;
+        position:absolute;
+        right: 0;
+        bottom:0;
+        margin-bottom:4px;
+        margin-right:8px;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 25px;
+        display:none
+    }
+</style>
+<!--////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<body>
+<div id="FENETRE_INDEX" style="display:block">
+    <h1>
+        <div id="user_titre"></div></h1>
+    <table id = "menu" cellspacing="0">
+        <tr><td id="duo">Let's Play !</td></tr>
+        <tr><td id = "scores" >Hall of Fame</td></tr>
+        <tr><td id ="chat" style="position:relative"><div id="chatte">Chat</div><div id="bignotif">0</div></td><!--<td id="aide" onClick = 'window.location.href="http://localhost:8080/aide.html"'>aide</td>--></tr>
+    </table>
+    <br>
+    <br>
+    <div style="font-style:italic;font-size:50%;color:white"> Developped by Clémentine and Antonin</div>
+</div>
+
+
+<!--////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+
+<div id="FENETRE_JEU" style="display: none">
+    <table>
+        <tr><td class="bouton_retour" style="position:relative" id="bouton_retour_jeu">Retour Accueil<div class="littlenotif">0</div></td></tr>
+    </table>
+    <div id="div_score">
+    <table id="score">
+        <tr><td id="joueur_1" width="300px"><div id="j1">Joueur 1</div></td>
+            <td id="td_score_1" width="60px"><div id="s1">0</div></td>
+            <td id="td_score_2" width="60px"><div id="s2">0</div></td>
+            <td id="joueur_2" width="300px"><div id="j2">Joueur 2</div></td>
+        </tr>
+    </table>
+    </div>
+    <div id="en_attente" style="display:none">
+        <table>
+            <tr><td id="texte_attente" style="background-color: lightgreen;font-style:italic;color:darkgreen">Waiting for someone to play against...</td></tr>
+        </table>
+    </div>
+    <div id="canvas_div">
+        <canvas id="canvas" width = "1050" height = "680"> </canvas>
+    </div>
+    <br><br><br>
+    <div id="fin_match">
+        <div id="fin_match_message">Texte</div>
+        <br>
+        <table id="menu">
+            <tr><td id="Nouvelle_Partie" class="button" >Nouvelle Partie</td></tr>
+            <tr><td id ="Retour_menu" class="button">Retour au Menu</td></tr>
+        </table>
+    </div>
+</div>
+
+<!--////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+
+<div id="FENETRE_CHAT" style="display: none">
+    <table>
+        <tr><td class="bouton_retour" style="position: relative">Retour Accueil<div class="littlenotif">0</div></td></tr>
+    </table>
+    <h1><div id="titre_chat">Oops ! It seems, you're alone...</div></h1>
+    <div id='zone'>
+        <table id="zone_chat" valign="bottom" >
+            <caption align="bottom">
+            </caption>
+        </table>
+    </div>
+    <br>
+    <form action="/" method="post" id="formulaire_chat">
+        <table id="sendbox">
+            <tr><td id="message">
+                <input type="text" name="m" id="m" placeholder="Type here..." autofocus style="color:white" />
+
+
+            </td>
+                <td id="send" style="width:30px">
+                    <input type="submit" id="envoi_message" value="&#x21E7; " />
+                </td></tr>
+        </table>
+
+    </form>
+    <br>
+    <div style="font-style:italic;font-size:80%;color:white"> While you are online, this conversation will be saved !</div>
+
+</div>
+
+
+<!--////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+
+
+<div id="FENETRE_HAF" style="display: none">
+    <table>
+        <tr><td class="bouton_retour" style="position: relative">Retour Accueil<div class="littlenotif">0</div></td></tr>
+    </table>
+    <h1>Hall of Fame</h1>
+    <table id="results">
+        <tr><td class=entete" style="width: 30px">Rank<td class="entete" style="width: 200px">User</td><td class="entete" style="width: 30px">Wins</td></tr>
+    </table>
+</div>
+
+
+    <script>
+        var socket = io.connect('http://localhost:8080');
+    </script>
+</body>
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+
+
+
+<!--////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!--////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!--////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+
+
+
+
+<script>
+  //Gestion de la navigation entre les differentes fenetres///////////////////////////////////////////////////////////////////////
+
+  var fenetre_index=document.getElementById('FENETRE_INDEX');
+  var fenetre_jeu=document.getElementById('FENETRE_JEU');
+  var fenetre_chat=document.getElementById('FENETRE_CHAT');
+  var fenetre_haf=document.getElementById('FENETRE_HAF');
+
+  fenetre_jeu.style.display='none';
+  fenetre_chat.style.display='none';
+  fenetre_haf.style.display='none';
+
+  //Gestion des boutons de l'index
+  var vers_jeu=document.getElementById('duo');
+  var vers_chat=document.getElementById('chat');
+  var vers_haf=document.getElementById('scores');
+
+  vers_jeu.addEventListener('click',function(){
+      fenetre_index.style.display='none';
+      fenetre_jeu.style.display='block';
+      fin_match.style.display='none';
+      canvas.style.display='block';
+  });
+  vers_chat.addEventListener('click',function(){
+      fenetre_index.style.display='none';
+      fenetre_chat.style.display='block';
+  });
+  vers_haf.addEventListener('click',function(){
+      fenetre_index.style.display='none';
+      fenetre_haf.style.display='block'
+  });
+
+  //Gestion des autres boutons
+  //boutons retours
+  var bouttons_retour=document.getElementsByClassName('bouton_retour');
+  var retour_menu=document.getElementById('Retour_menu');
+  for (i=0; i<bouttons_retour.length ; i++){
+      var retour=bouttons_retour[i];
+      retour.addEventListener('click',function(){
+          fenetre_index.style.display='block';
+          fenetre_jeu.style.display='none';
+          fenetre_chat.style.display='none';
+          fenetre_haf.style.display='none';
+      })
+  }
+  retour_menu.addEventListener('click',function(){
+      fenetre_index.style.display='block';
+      fenetre_jeu.style.display='none';
+      fenetre_chat.style.display='none';
+      fenetre_haf.style.display='none';
+  });
+  //boutton nouvelle partie
+  var nouvelle_partie=document.getElementById("Nouvelle_Partie")
+
+  //Gestion de la connexion///////////////////////////////////////////////////////////////////////////////////////////////////////
+    var user=window.prompt('Hey ! What\'s your nickname ?');
+    while (user==null||user==""){
+            alert('You must sign in with a username to go on...');
+            user=window.prompt('So, let\'s do it again !\nWhat\'s your nickname ?')
+    }
+      socket.on('already_known',function(bool){
+      console.log('User already exists '+bool);
+      if (bool){
+          var confirmation=window.confirm('This username is already token !\nAre you the one who created it ?');
+          if (confirmation===false){user==null}
+      }
+  });
+
+        socket.emit('username',user);
+        socket.on('too much connexions',function(bool){
+            if (bool){
+                alert('Our server is victim from success... Too much connexions for now.\n' +
+                    'Please try again later!');
+                console.log('ok '+user);
+                socket.emit('username',user);
+            }
+        });
+
+
+  //je suis la
+  socket.on('you there ?',function(){
+      console.log('Hey i am still there ! My name is '+user);
+      socket.emit('present',user)
+      if (getComputedStyle(canvas, null).display==='block' && getComputedStyle(fenetre_jeu, null).display==='block'){
+          socket.emit('still ready');
+      }
+  });
+
+  //STYLE GENERAL//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  var cells=[vers_chat,vers_haf,vers_jeu,bouttons_retour[0],bouttons_retour[1],nouvelle_partie,bouttons_retour[2],retour_menu];
+    for ( n = 0; n < cells.length; n++ ) {
+        var cell = cells[n];
+         cell.addEventListener('mouseover',function(){
+             this.style.fontSize='130%';
+             this.style.backgroundColor='lightgreen';
+             this.style.color='darkgreen';
+         });
+        cell.addEventListener('mouseout',function(){
+            this.style.fontSize='';
+            this.style.backgroundColor='';
+            this.style.color='';
+        });
+    }
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  //SCRIPT INDEX
+
+  user_titre.innerHTML='Welcome to Champions Pong, '+user+' !';
+
+  //pour le titre de chat
+  socket.on('connected_users',function(cu){
+      if (cu.length>1){
+          if (user===cu[0].name) {
+              chatte.innerHTML = 'Chat with ' + cu[1].name+"<div id='bignotif'>0</div>"
+          }else {
+              chatte.innerHTML= 'Chat with ' + cu[0].name+"<div id='bignotif'>0</div>"
+          }
+      }else{
+          chatte.innerHTML='Chat with yourself'
+      }
+  });
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  //SCRIPT HAF
+  var tableau=document.getElementById('results');
+
+  socket.on('victoires',function(victoires){
+      tableau.innerHTML="<tr><td class='entete' style='width: 30px'>Rank<td class='entete' style='width: 200px'>User</td><td class='entete' style='width: 30px'>Wins</td></tr>"
+      console.log(victoires);
+      //var victoires =[{name:'crack',wins:4},{name:'javah',wins:5},{name:'nullos',wins:3}]
+      var users = [];
+      var vict = [];
+      for (var p=0;p<victoires.length ; p++){
+          vict.push(victoires[p].wins);
+          users.push(victoires[p].name)
+      }
+      console.log(vict,users);
+      var rank=1
+      var th='st'
+      while(vict.length>0){
+          var M =Math.max.apply(null, vict);
+          console.log(M);
+          //on cherche l'index de ce max puisque la fonction findIndex ne marche pas
+          i=indicemax(vict,M);
+          console.log(i);
+          var ligne=tableau.insertRow(-1);
+          var c0=ligne.insertCell(0);
+          if(rank===1||rank===11||rank===21||rank===31||rank===41){th='st'}
+          else if(rank===2||rank===12||rank===22||rank===32||rank===42){th='nd'}
+          else if(rank===3||rank===13||rank===23||rank===33||rank===43){th='rd'}
+          else{th='st'}
+          c0.innerHTML=rank+th;
+          var c1=ligne.insertCell(1);
+          c1.innerHTML=users[i];
+          var c2=ligne.insertCell(2);
+          c2.innerHTML=M;
+          vict.splice(i,1);
+          users.splice(i,1);
+          console.log(vict,users);
+          c0.style.backgroundColor='green';
+          c1.style.backgroundColor='green';
+          c2.style.backgroundColor='green';
+          c0.style.color='white';
+          c1.style.color='white';
+          c2.style.color='white';
+          rank+=1;
+      }
+  });
+
+
+  function indicemax(tableau,max){
+      res=0;
+      for (var j=0;j<tableau.length;j++){
+          if (tableau[j]===max){ res = j}
+      }
+      return res
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  //SCRIPT CHAT
+
+  var zone_chat=document.getElementById('zone_chat');
+  socket.on('connected_users',function(cu){
+      if (cu.length>1){
+          if (user===cu[0].name) {
+              titre_chat.innerHTML = 'Chat with ' + cu[1].name
+          }else {
+              titre_chat.innerHTML = 'Chat with ' + cu[0].name
+          }
+      }else{
+          titre_chat.innerHTML = "Oops ! It seems that you\'re alone..."
+      }
+  });
+
+  //recharger les messages précédents
+  /*vers_chat.addEventListener('click',function(){
+      socket.emit('reload messages');
+      socket.on('messages_reloaded',function(data){
+          for (var i=0 ; i<data.chats.length ; i++){
+              if (data.chats[i].pseudo===user){insereMessageMe(data.chats[i].message)}
+              else{insereMessageHim(data.chats[i].pseudo,data.chats[i].message)
+              }
+          }
+      });
+  });*/
+
+  //gestion des notifications
+  var notif=0;
+  littlenotifs=document.getElementsByClassName('littlenotif');
+  bignotif=document.getElementById('bignotif');
+
+  vers_chat.addEventListener('click',function(){
+      notif=0;
+      for (i = 0 ; i<littlenotifs.length ; i++){
+          var littlenotif= littlenotifs[i];
+          littlenotif.style.display='none';
+      }
+      bignotif.style.display='none'
+  });
+
+  // Quand on reçoit un message, on l'insère dans la page et on recoit une notif si on est pas sur la conv
+  socket.on('message', function(data) {
+      console.log('le client a recu le message :'+JSON.stringify(data));
+      if (getComputedStyle(fenetre_chat, null).display==='none'){
+          notif+=1;
+          for (i = 0 ; i<littlenotifs.length ; i++){
+              var littlenotif= littlenotifs[i];
+              littlenotif.innerHTML=notif;
+              littlenotif.style.display='block';
+          }
+          bignotif.innerHTML=notif;
+          bignotif.style.display='block'
+      }
+      insereMessageHim(data.pseudo,data.message);
+  })
+
+  // Lorsqu'on envoie le formulaire, on transmet le message et on l'affiche sur la page
+  $('#formulaire_chat').submit(function () {
+      var message = $('#m').val();
+      socket.emit('message', {pseudo:user,message:message}); // Transmet le message aux autres
+      console.log('message transmis au serveur :'+JSON.stringify({pseudo:user,message:message}));
+      insereMessageMe(message); // Affiche le message aussi sur notre page
+      $('#m').val('').focus(); // Vide la zone de Chat et remet le focus dessus
+      return false; // Permet de bloquer l'envoi "classique" du formulaire
+  });
+
+
+  //console.log(m.value);
+  //insereMessageMe('hello');
+  //insereMessageHim('javah','hello how are you');
+
+  function insereMessageHim(him,data){
+      var ligne=zone_chat.insertRow(-1);
+      var c2=ligne.insertCell(0);
+      c2.innerHTML=data;
+      c2.style.backgroundColor='white';
+      c2.style.color='darkgreen';
+      c2.style.border='0px';
+      c2.style.width='200px';
+      c2.style.paddingLeft='8px';
+      c2.style.paddingRight='8px';
+      var c1=ligne.insertCell(1);
+      c1.innerHTML=him;
+      c1.style.backgroundColor='transparent';
+      c1.style.border='0px';
+      c1.style.width='200px';
+      c1.style.color='white';
+      c1.style.textAlign='left';
+      c1.style.fontStyle='italic';
+      c1.style.fontSize='80%';
+      ligne.focus()
+      var z = document.getElementById('zone');
+      z.scrollTop=z.scrollHeight;
+  }
+
+  function insereMessageMe(data){
+      var ligne=zone_chat.insertRow(-1);
+      var c1=ligne.insertCell(0);
+      c1.innerHTML='me';
+      c1.style.backgroundColor='transparent';
+      c1.style.border='0px';
+      c1.style.width='200px';
+      c1.style.color='lightgreen';
+      c1.style.textAlign='right';
+      c1.style.fontStyle='italic';
+      c1.style.fontSize='80%';
+      var c2=ligne.insertCell(1);
+      c2.innerHTML=data;
+      c2.style.backgroundColor='lightgreen';
+      c2.style.color='darkgreen'
+      c2.style.border='0px'
+      c2.style.width='200px';
+      c2.style.paddingLeft='8px';
+      c2.style.paddingRight='8px';
+      var z = document.getElementById('zone');
+      z.scrollTop=z.scrollHeight;}
+
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  //SCRIPT JEU
+  var canvas = document.querySelector('#canvas');
+  var ctx = canvas.getContext('2d');
+
+  // paramètres du terrain de jeu
+  but_couleur = "white";
+  balle_couleur = "yellow";
+  but_w = 20;
+  but_h = 110;
+  balle_r = 15;
+
+  var fin_match=document.getElementById('fin_match');
+  var div_en_attente=document.getElementById('en_attente');
+  fin_match.style.display='none';
+  div_en_attente.style.display='none';
+
+  var td_score_1 = document.getElementById('td_score_1');
+  var td_score_2 = document.getElementById('td_score_2');
+
+
+  socket.on('connected_users',function(connected_list) {
+      j1.innerHTML = connected_list[0].name;
+      if (connected_list.length === 2) {
+          j2.innerHTML = connected_list[1].name
+      }
+
+
+
+    //on veut commmencer une partie depuis le menu
+      vers_jeu.addEventListener('click', function () {
+          socket.emit('i want to know if game on');
+          socket.on('serveur socket state of the game',function(bool){
+              if (bool) {
+                  if (getComputedStyle(div_en_attente, null).display==='block'){
+                      $(document).ready(function(){
+                          $('#en_attente').slideUp(500)
+                      })}
+                  socket.emit('back to the game');
+              }else{
+                  en_attente.style.display='none';
+                  W = 1050;
+                  H = 680;
+                  var d1 = 40;
+                  var d2 = W - d1 - but_w;
+                  var y1 = (H - but_h) / 2;
+                  var y2 = y1;
+                  balle_x = W / 2;
+                  balle_y = H / 2;
+
+                  //effaçons le terrain
+                  ctx.clearRect(0, 0, W, H);
+                  //on réinitialise la partie
+                  socket.emit('reinitialize game');
+                  s1.innerHTML=0;
+                  s2.innerHTML=0;
+
+                  //création de la balle et terrain
+
+                  ctx.strokeStyle = "lightgreen";
+                  ctx.lineWidth = "8";
+                  ctx.beginPath();
+                  ctx.moveTo(W / 2, 0);
+                  ctx.lineTo(W / 2, H);
+                  ctx.moveTo(W / 2 + 120, H / 2);
+                  ctx.arc(W / 2, H / 2, 120, 0, 2 * Math.PI);
+                  ctx.moveTo(0, H / 4);
+                  ctx.lineTo(W / 6, H / 4);
+                  ctx.lineTo(W / 6, 3 * H / 4);
+                  ctx.lineTo(0, 3 * H / 4);
+                  ctx.moveTo(W / 6, H / 2 - 120 * Math.sqrt(3) / 2)
+                  ctx.arc(W / 6 - 60, H / 2, 120, -Math.PI / 3, Math.PI / 3);
+                  ctx.moveTo(W, H / 4);
+                  ctx.lineTo(5 * W / 6, H / 4);
+                  ctx.lineTo(5 * W / 6, 3 * H / 4);
+                  ctx.lineTo(W, 3 * H / 4);
+                  ctx.moveTo(5 * W / 6, H / 2 + 120 * Math.sqrt(3) / 2)
+                  ctx.arc(W - W / 6 + 60, H / 2, 120, 2 * Math.PI / 3, 4 * Math.PI / 3);
+                  ctx.stroke();
+                  dessineBalle(balle_x, balle_y, balle_r);
+
+
+                  console.log(user + ' is ready');
+                  socket.emit('ready');
+                  if (connected_list.length === 1) {
+                      texte_attente.innerHTML = 'You must be 2 online to play. Waiting for someone...';
+                      if (getComputedStyle(div_en_attente, null).display==='none'){
+                      $(document).ready(function(){
+                          $('#en_attente').slideDown(500)
+                      })}
+
+                  } else {
+                      if (user === connected_list[0].name) {
+                              texte_attente.innerHTML = 'Waiting for ' + connected_list[1].name + '...';
+                          if (getComputedStyle(div_en_attente, null).display==='none'){
+                              $(document).ready(function(){
+                                  $('#en_attente').slideDown(500)
+                              })}
+
+                      } else {
+                          texte_attente.innerHTML = 'Waiting for ' + connected_list[0].name + '...';
+                          if (getComputedStyle(div_en_attente, null).display==='none'){
+                              $(document).ready(function(){
+                                  $('#en_attente').slideDown(500)
+                              })}
+                      }
+                  }
+              }
+          })
+
+      });
+
+      //on veut commmencer une partie depuis le bouton nouvelle partie
+
+      nouvelle_partie.addEventListener('click',function(){
+          socket.emit('i want to know if game on');
+          socket.on('serveur socket state of the game',function(bool){
+              if (bool) {
+                  if (getComputedStyle(div_en_attente, null).display==='block'){
+                      $(document).ready(function(){
+                          $('#en_attente').slideUp(500)
+                      })}
+                  socket.emit('back to the game');
+              }else{
+                  en_attente.style.display='none'
+                  W = 1050;
+                  H = 680;
+                  var d1 = 40;
+                  var d2 = W - d1 - but_w;
+                  var y1 = (H - but_h) / 2;
+                  var y2 = y1;
+                  balle_x = W / 2;
+                  balle_y = H / 2;
+
+                  //effaçons le terrain
+                  ctx.clearRect(0, 0, W, H);
+                  //on réinitialise la partie
+                  socket.emit('reinitialize game');
+                  s1.innerHTML=0;
+                  s2.innerHTML=0;
+
+                  //création de la balle et terrain
+
+                  ctx.strokeStyle = "lightgreen";
+                  ctx.lineWidth = "8";
+                  ctx.beginPath();
+                  ctx.moveTo(W / 2, 0);
+                  ctx.lineTo(W / 2, H);
+                  ctx.moveTo(W / 2 + 120, H / 2);
+                  ctx.arc(W / 2, H / 2, 120, 0, 2 * Math.PI);
+                  ctx.moveTo(0, H / 4);
+                  ctx.lineTo(W / 6, H / 4);
+                  ctx.lineTo(W / 6, 3 * H / 4);
+                  ctx.lineTo(0, 3 * H / 4);
+                  ctx.moveTo(W / 6, H / 2 - 120 * Math.sqrt(3) / 2)
+                  ctx.arc(W / 6 - 60, H / 2, 120, -Math.PI / 3, Math.PI / 3);
+                  ctx.moveTo(W, H / 4);
+                  ctx.lineTo(5 * W / 6, H / 4);
+                  ctx.lineTo(5 * W / 6, 3 * H / 4);
+                  ctx.lineTo(W, 3 * H / 4);
+                  ctx.moveTo(5 * W / 6, H / 2 + 120 * Math.sqrt(3) / 2)
+                  ctx.arc(W - W / 6 + 60, H / 2, 120, 2 * Math.PI / 3, 4 * Math.PI / 3);
+                  ctx.stroke();
+                  dessineBalle(balle_x, balle_y, balle_r);
+
+
+                  console.log(user + ' is ready');
+                  socket.emit('ready');
+                  if (connected_list.length === 1) {
+                      texte_attente.innerHTML = 'You must be 2 online to play. Waiting for someone...';
+                      if (getComputedStyle(div_en_attente, null).display==='none'){
+                          $(document).ready(function(){
+                              $('#en_attente').slideDown(500)
+                          })}
+
+                  } else {
+                      if (user === connected_list[0].name) {
+                          texte_attente.innerHTML = 'Waiting for ' + connected_list[1].name + '...';
+                          if (getComputedStyle(div_en_attente, null).display==='none'){
+                              $(document).ready(function(){
+                                  $('#en_attente').slideDown(500)
+                              })}
+
+                      } else {
+                          texte_attente.innerHTML = 'Waiting for ' + connected_list[0].name + '...';
+                          if (getComputedStyle(div_en_attente, null).display==='none'){
+                              $(document).ready(function(){
+                                  $('#en_attente').slideDown(500)
+                              })}
+                      }
+                  }
+              }
+          });
+
+          fin_match.style.display='none';
+          canvas.style.display='block';
+
+
+      });
+
+
+
+      if (connected_list.length === 1) {
+          texte_attente.innerHTML = 'You must be 2 online to play. Waiting for someone...';
+          if (getComputedStyle(div_en_attente, null).display==='none'){
+              $(document).ready(function(){
+                  $('#en_attente').slideDown(500)
+              })}
+
+      } else {
+          if (user === connected_list[0].name) {
+              texte_attente.innerHTML = 'Waiting for ' + connected_list[1].name + '...';
+              if (getComputedStyle(div_en_attente, null).display==='none'){
+                  $(document).ready(function(){
+                      $('#en_attente').slideDown(500)
+                  })}
+
+          } else {
+              texte_attente.innerHTML = 'Waiting for ' + connected_list[0].name + '...';
+              if (getComputedStyle(div_en_attente, null).display==='none'){
+                  $(document).ready(function(){
+                      $('#en_attente').slideDown(500)
+                  })}
+          }
+      }
+
+      //je quitte la session de jeu
+      bouton_retour_jeu=document.getElementById('bouton_retour_jeu');
+      bouton_retour_jeu.addEventListener('click',function(){
+          socket.emit('not ready');
+          console.log('joueur quitte la session de jeu');
+          socket.emit('i want to inform. game on ?');
+      });
+
+      //mon adversaire  quitte la session de jeu
+      socket.on('serveur broadcast state of the game',function(bool){
+          if (bool){
+              texte_attente.innerHTML = 'Your opponent quit the game. Waiting for him...';
+              if (getComputedStyle(div_en_attente, null).display==='none'){
+                  $(document).ready(function(){
+                      $('#en_attente').slideDown(500)
+                  })}
+          }
+      });
+
+      //mon adversaire revient sur la session de jeu
+      socket.on('opponent back to the game',function(){
+          if (getComputedStyle(div_en_attente, null).display==='block'){
+              $(document).ready(function(){
+                  $('#en_attente').slideUp(500)
+              })}
+      })
+
+          socket.on('begin', function () {
+              texte_attente.innerHTML = 'Ready, steady...';
+              if (getComputedStyle(div_en_attente, null).display==='none'){
+                  $(document).ready(function(){
+                      $('#en_attente').slideDown(500)
+                  })}
+            console.log('ca begin');
+              //decompte
+              ctx.fillStyle = 'lightgreen';
+              ctx.beginPath();
+              ctx.arc(4*W / 12, H / 8, 20, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.arc(5 * W / 12, H / 8, 20, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.arc(6 * W / 12, H / 8, 20, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.arc(7 * W / 12, H / 8, 20, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.arc(8 * W / 12, H / 8, 20, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.closePath()
+              ctx.beginPath();
+              ctx.fillStyle = 'yellow';
+              setTimeout(function () {
+                  ctx.arc(4*W / 12, H / 8, 20, 0, Math.PI * 2);
+                  ctx.fill();
+              }, 1000);
+              setTimeout(function () {
+                  ctx.arc(5*W / 12, H / 8, 20, 0, Math.PI * 2);
+                  ctx.fill();
+              }, 2000);
+              setTimeout(function () {
+                  ctx.arc(6*W / 12, H / 8, 20, 0, Math.PI * 2);
+                  ctx.fill();
+                  texte_attente.innerHTML = '3...';
+              }, 3000);
+              setTimeout(function () {
+                  ctx.arc(7*W / 12, H / 8, 20, 0, Math.PI * 2);
+                  ctx.fill();
+                  texte_attente.innerHTML = '2...';
+              }, 4000);
+              setTimeout(function () {
+                  ctx.arc(8*W / 12, H / 8, 20, 0, Math.PI * 2);
+                  ctx.fill();
+                  texte_attente.innerHTML = '1...';
+              }, 5000);
+              setTimeout(function () {
+                  if (getComputedStyle(div_en_attente, null).display==='block'){
+                  $(document).ready(function(){
+                      $('#en_attente').slideUp(500)
+                  })}
+              }, 6000);
+              ctx.closePath();
+              //bouger la balle
+              socket.on('move_balle', function (coord) {
+                  balle_x = coord[0]['balle_x'];
+                  balle_y = coord[0]['balle_y'];
+                  balle_r = coord[0]['balle_r'];
+                  d1 = coord[1][0]['d'];
+                  y1 = coord[1][0]['y'];
+                  d2 = coord[1][1]['d'];
+                  y2 = coord[1][1]['y'];
+
+                  //On efface le canvas
+                  ctx.clearRect(0, 0, W, H);
+                  //on redessine le terrain
+                  ctx.strokeStyle = "lightgreen";
+                  ctx.lineWidth = "8";
+                  ctx.beginPath();
+                  ctx.moveTo(W / 2, 0);
+                  ctx.lineTo(W / 2, H);
+                  ctx.moveTo(W / 2 + 120, H / 2);
+                  ctx.arc(W / 2, H / 2, 120, 0, 2 * Math.PI);
+                  ctx.moveTo(0, H / 4);
+                  ctx.lineTo(W / 6, H / 4);
+                  ctx.lineTo(W / 6, 3 * H / 4);
+                  ctx.lineTo(0, 3 * H / 4);
+                  ctx.moveTo(W / 6, H / 2 - 120 * Math.sqrt(3) / 2)
+                  ctx.arc(W / 6 - 60, H / 2, 120, -Math.PI / 3, Math.PI / 3);
+                  ctx.moveTo(W, H / 4);
+                  ctx.lineTo(5 * W / 6, H / 4);
+                  ctx.lineTo(5 * W / 6, 3 * H / 4);
+                  ctx.lineTo(W, 3 * H / 4);
+                  ctx.moveTo(5 * W / 6, H / 2 + 120 * Math.sqrt(3) / 2)
+                  ctx.arc(W - W / 6 + 60, H / 2, 120, 2 * Math.PI / 3, 4 * Math.PI / 3);
+                  ctx.stroke();
+
+                  //on redessine la balle, mais plus loin
+                  dessineBalle(balle_x, balle_y, balle_r);
+
+                  //les buts
+                  dessineBut(d1, y1, but_w, but_h);
+                  dessineBut(d2, y2, but_w, but_h);
+              });
+
+              //activer les flèches
+
+
+              socket.on('score_update2', function (score) {
+
+                  s2.innerHTML = score[1];
+                  canvas.style.backgroundColor = 'lightgreen';
+                  td_score_2.style.backgroundColor = 'red';
+                  setTimeout(function () {
+                      canvas.style.backgroundColor = ''
+                  }, 40);
+                  setTimeout(function () {
+                      td_score_2.style.backgroundColor = ''
+                  }, 1200);
+              });
+              socket.on('score_update1', function (score) {
+                  s1.innerHTML = score[0];
+                  canvas.style.backgroundColor = 'lightgreen';
+                  td_score_1.style.backgroundColor = 'red';
+                  setTimeout(function () {
+                      canvas.style.backgroundColor = ''
+                  }, 40);
+                  setTimeout(function () {
+                      td_score_1.style.backgroundColor = ''
+                  }, 1200);
+              });
+
+              socket.on('W2', function () {
+                  if (connected_list[0].name === user) {
+                      fin_match_message.innerHTML = 'It seems, you\'re a loser...'
+                  } else {
+                      fin_match_message.innerHTML = 'YES dude ! What a way of winning.<br><br>Check the Hall of Fame, +1 win for you :)';
+                  }
+                  canvas.style.display = 'none';
+                  fin_match.style.display = 'block';
+                  if (getComputedStyle(div_en_attente, null).display==='block'){
+                      $(document).ready(function(){
+                          $('#en_attente').slideUp(500)
+                      })}
+              });
+
+              socket.on('W1', function () {
+                  if (connected_list[0].name === user) {
+                      fin_match_message.innerHTML = 'YES dude ! What a way of winning.<br><br>Check the Hall of Fame, +1 win for you :)'
+                  } else {
+                      fin_match_message.innerHTML = 'It seems, you\'re a loser...'
+                  }
+                  canvas.style.display = 'none';
+                  fin_match.style.display = 'block';
+                  if (getComputedStyle(div_en_attente, null).display==='block'){
+                      $(document).ready(function(){
+                          $('#en_attente').slideUp(500)
+                      })}
+              });
+
+              socket.on('Wforfait', function () {
+                  fin_match_message.innerHTML = 'Sorry, but your opponent is offline now.\nKeep smiling : you won by forfeit. Check the Hall of Fame !'
+                  canvas.style.display = 'none';
+                  fin_match.style.display = 'block';
+                  setTimeout(function(){
+                      $(document).ready(function(){
+                          $('#en_attente').slideUp(500)
+                      })},2000)
+              });
+
+          });
+
+      if (user === connected_list[0].name) {
+          window.addEventListener('keydown', move_but1);
+
+          function move_but1(e) {
+              key = `${e.code}`;
+              if ((key == "ArrowUp" || key == "ArrowRight") && y1 > 0) {
+                  socket.emit('moveup1');
+              }
+              if ((key == "ArrowDown" || key == "ArrowLeft") && y1 < H - but_h) {
+                  socket.emit('movedown1');
+              }
+          }
+      } else {
+          window.addEventListener('keydown', move_but2);
+
+          function move_but2(e) {
+              key = `${e.code}`;
+              if ((key == "ArrowUp" || key == "ArrowRight") && y2 > 0) {
+                  socket.emit('moveup2');
+              }
+              if ((key == "ArrowDown" || key == "ArrowLeft") && y2 < H - but_h) {
+                  socket.emit('movedown2');
+              }
+          }
+
+  }
+  });
+
+
+
+
+
+
+  //codons le mouvement en fonction de si on est le j1 ou le j2. Nous envoyons d et y au serveur
+
+  function dessineBut(x,y,w,h) {
+      ctx.fillStyle = but_couleur;
+      ctx.fillRect(x,y,w,h);
+  };
+  function dessineBalle(x,y,r){
+      ctx.fillStyle = balle_couleur;
+      ctx.beginPath();
+      ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fill();
+      ctx.closePath();
+  }
+
+
+</script>
+
+
+</html>
